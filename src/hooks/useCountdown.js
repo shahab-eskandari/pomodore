@@ -1,41 +1,83 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-const useCountdown = ([pomodoroDurationMin=25 , restDurationMin=5]) => {
-    
-    const pomodoroDurationSec = pomodoroDurationMin * 60 ;
-    const restDurationSec = restDurationMin * 60;
+const useCountdown = ([pomodoroDuration, breakDuration, pomodoroType, pomodoroStatus]) => {
+  //pomodoroDuration is in Minutes 
+  //pomodoroType === "Focus" | "Break"
+  //pomodoroStatus === "Paused" | "Running" | "Finished" | "Start"
+
+    const pomodoroDurationSec = pomodoroDuration* 60 ;
+    const breakDurationSec = breakDuration * 60; 
+
+    let interval=useRef(null);
 
     const [countDown, setCountDown] = useState(pomodoroDurationSec);
-    const [rest, setRest] = useState(true);
+    const [type, setType] = useState(pomodoroType);
+    const [status, setStatus] = useState(pomodoroStatus); 
 
     useEffect(() => {
-        //console.log([rest,countDown]);
-        const interval = setInterval(() => {
-          if(countDown!==0){
-            setCountDown(countDown-1);
-          }else{
-            setRest(!rest);
-            console.log(rest);
-            if(rest){
-              setCountDown(restDurationSec);
+        if(status ==='Running'){
+          interval.current = setInterval(() => {
+            if(countDown!==0){
+              setCountDown(countDown-1);
             }else{
-              setCountDown(pomodoroDurationSec)
+              if(type==="Focus"){
+                setStatus("Finished");
+                setCountDown(breakDurationSec)
+              }else{
+                setStatus("Finished");
+                setCountDown(pomodoroDurationSec)
+              }
             }
-          }
-        
-        }, 1000);
-        return () => clearInterval(interval);
+          }, 1000);
+        }
+        if(status==='Finished' || status==='Paused'){
+          clearInterval(interval.current);
+        }
+      
+      return () => clearInterval(interval.current);
     },);
 
-    return getReturnValues(countDown);
-};
+    const handlePause = () => { 
+      setStatus("Paused");
+    }
 
-const getReturnValues = (countDown) => {
-  // calculate time left
-  const minutes = Math.floor(countDown / 60 );
-  const seconds = Math.floor( countDown % 60 );
+    const handleContinue = ()=>{
+      setStatus("Running");
+    }
 
-  return [minutes, seconds];
+    const handleStop = ()=>{
+      setStatus("Start");
+      setCountDown(pomodoroDurationSec);
+    }
+
+    const handleStartFocus = ()=>{
+      setType("Focus")
+      setStatus("Running");
+    }
+
+    const handleStartBreak = ()=>{
+      setStatus("Running"); 
+      setType("Break");
+      setCountDown(breakDurationSec);
+    }
+
+    const handleSkipBreak = ()=>{
+      setType("Focus");
+      setStatus("Start"); 
+      setCountDown(pomodoroDurationSec);
+    }
+     
+    return [
+      countDown, 
+      type, 
+      status, 
+      handlePause, 
+      handleContinue, 
+      handleStop, 
+      handleStartFocus, 
+      handleStartBreak,
+      handleSkipBreak];    
 };
 
 export { useCountdown };
+

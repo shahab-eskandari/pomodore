@@ -1,25 +1,31 @@
 import React from 'react';
-import TimeDisplay from './timeDisplay';
+import ShowCounter from './showCounter';
+import ButtonsPanel from './buttonsPanel';
 import { useCountdown } from '../hooks/useCountdown';
 
 
-const ShowCounter = ({ minutes, seconds }) => {
-  return (
-    <div className="show-counter">
-        <TimeDisplay value={minutes} type={'Mins'} isDanger={false} />
-        <TimeDisplay value={seconds} type={'Seconds'} isDanger={false} />
-    </div>
-  );
-};
-
-const CountdownTimer = ({ durationInMinute }) => {
-  const [minutes, seconds] = useCountdown(durationInMinute);
+const CountdownTimer = ({ pomodoroData }) => {
+  
+  const [countDown, 
+    type, 
+    status, 
+    handlePause, 
+    handleContinue, 
+    handleStop, 
+    handleStartFocus, 
+    handleStartBreak, 
+    handleSkipBreak] = useCountdown(pomodoroData);
+  
     return (
-      <ShowCounter
-        minutes={minutes}
-        seconds={seconds}
-      />
+        <div>
+            <div>
+                <ShowCounter countDown={countDown}/>
+            </div>
+            <div>
+                <ButtonsPanel data={[type,status,handlePause, handleContinue, handleStop, handleStartFocus, handleStartBreak, handleSkipBreak]}/>
+            </div>
+        </div>
     );
-  }
+}
 
 export default CountdownTimer;

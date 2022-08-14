@@ -1,10 +1,8 @@
-import React from 'react';
 
-const TimeDisplay = ({ value, type, isDanger }) => {
+const TimeDisplay = ({ value }) => {
   return (
-    <div className={isDanger ? 'countdown danger' : 'countdown'}>
-      <p>{value}</p>
-      <span>{type}</span>
+    <div>
+      <h1 className="time-display__number">{value}</h1>
     </div>
   );
 };
